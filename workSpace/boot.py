@@ -3,12 +3,15 @@ from machine import I2C,Pin,SPI
 import time, os
 import _thread
 
-import ip5306, st7735
+import ip5306
 
-LCD_RESET = Pin(4, Pin.OUT, Pin.PULL_DOWN)
-LCD_DC = Pin(25, Pin.OUT, Pin.PULL_DOWN)
-LCD_CS = Pin(14, Pin.OUT, Pin.PULL_DOWN)
-LCD_BLK = Pin(33, Pin.OUT)
+from st7735 import TFT, TFTColor
+from sysfont import sysfont
+
+LCD_RESET = 4 	# Pin(4, Pin.OUT, Pin.PULL_DOWN)
+LCD_DC = 25 	# Pin(25, Pin.OUT, Pin.PULL_DOWN)
+LCD_CS = 14 	# Pin(14, Pin.OUT, Pin.PULL_DOWN)
+LCD_BLK = 33 	# Pin(33, Pin.OUT)
 
 i2c = I2C(0, scl=Pin(22), sda=Pin(21))
 vspi = SPI(2, baudrate=20000000, polarity=0, phase=0, sck=Pin(18), mosi=Pin(23), miso=Pin(19))
@@ -16,28 +19,26 @@ vspi = SPI(2, baudrate=20000000, polarity=0, phase=0, sck=Pin(18), mosi=Pin(23),
 led = Pin(13, Pin.OUT)
 ip5306.KeepBoostPowerOn(i2c)
 
-from testst import TFT
-print("Hello world, HUEHEUEHUE")
-lcd = st7735.LCD(vspi, LCD_CS, LCD_DC, LCD_RESET, LCD_BLK)
-lcd.set_backlight_brightness(100)
-lcd.start_display()
-#tft=TFT(vspi,25,4,14)
-#tft.initr()
-#tft.fill(st7735.TFTColor(0xFF, 0xFF, 0xFF))
-#lcd.draw()
-#tft.fill(st7735.TFTColor(0xFF, 0xFF, 0x00))
+tft=TFT(vspi,LCD_DC,LCD_RESET,LCD_CS, LCD_BLK)
+tft._offset = (4, 28)
+tft._size = (160, 160)
+tft.initr()
+tft.set_backlight_brightness(2)
+tft.invertcolor(False)
+tft.rotation(3)
+tft.fill(TFTColor(0x00, 0x00, 0x00))
 
-#running = True
+tft.text( (0, 0), "Teste de Margem", TFT.CYAN, sysfont, 1)
 
-#def LedBlink():
-#  while running:
-#    led.value(0)
-#    time.sleep(1)
-#    led.value(1)
-#    time.sleep(1)
+running = True
 
-#huebr = _thread.start_new_thread(LedBlink, ())
+def PrintBatteryLevel():
+ while running:
+ 	level = ip5306.GetBatteryPercent()
+ 	tft.text( (0, 10), "Bateria %s %%    " % level, TFT.CYAN, sysfont, 1)
+	time.sleep(0.1)
 
+batteryThread = _thread.start_new_thread(PrintBatteryLevel, ())
 
 
 
