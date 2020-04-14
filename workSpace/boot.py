@@ -34,8 +34,16 @@ running = True
 
 def PrintBatteryLevel():
  while running:
+ 	ip5306.Calibrate()
  	level = ip5306.GetBatteryPercent()
+ 	voltage = ip5306.GetBatteryVoltage()
  	tft.text( (0, 10), "Bateria %s %%    " % level, TFT.CYAN, sysfont, 1)
+ 	tft.text( (0, 20), "Tensao: %s V" % voltage, TFT.CYAN, sysfont, 1 )
+ 	tft.text( (0, 30), ip5306.EstimateBattery(), TFT.CYAN, sysfont, 1 )
+ 	#if ip5306.IsChargingCableOn(i2c):
+ 	#	tft.text( (0, 30), "Cabo Conectado", TFT.CYAN, sysfont, 1 )
+ 	#else:
+ 	#	tft.text( (0, 30), ip5306.EstimateBattery(), TFT.CYAN, sysfont, 1 )
 	time.sleep(0.1)
 
 batteryThread = _thread.start_new_thread(PrintBatteryLevel, ())
